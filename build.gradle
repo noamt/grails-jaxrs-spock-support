@@ -1,15 +1,35 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.1.0'
+    }
+}
+
+apply plugin: 'artifactory-publish'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: 'java'
 apply plugin: 'groovy'
 
-group = 'org.10ne.grails'
-
-
 repositories {
     maven { url 'http://repo.grails.org/grails/core' }
     maven { url 'https://noams.artifactoryonline.com/noams/grails-jaxrs-plugin-snapshots' }
     jcenter()
+}
+
+artifactory {
+    contextUrl = 'https://oss.jfrog.org/artifactory'
+    resolve {
+        repoKey = 'libs-release'
+    }
+    publish {
+        defaults {
+            publishArtifacts = true
+        }
+    }
 }
 
 def buildingForGrails22 = hasProperty('grails2.2')
@@ -26,6 +46,7 @@ if (buildingForGrails22) {
     ext.groovyVersion = '1.8.8'
 }
 
+group = 'org.10ne.grails'
 version = "0.0.1$revisionExtension-SNAPSHOT"
 
 configurations {
@@ -53,12 +74,24 @@ dependencies {
     provided 'javax.servlet:servlet-api:2.4'
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        dist(MavenPublication) {
+
             from components.java
+            artifact sourceJar {
+                classifier 'source'
+            }
         }
     }
+}
+
+artifactoryPublish {
+    publications(publishing.publications.dist)
 }
 
 idea {
