@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse
 /**
  * @author Noam Y. Tenne
  */
-abstract class IntegrationTestSpec extends IntegrationSpec implements JaxRsIntegrationTest {
+public class IntegrationTestSpec extends IntegrationSpec implements JaxRsIntegrationTest {
 
     @Shared
     def grailsApplication
